@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+  
+  db:
+    image: postgres
+    shm_size: 700mb
+    environment:
+      POSTGRES_DB: contacts_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admincontacts
+      TZ: Europe/Kyiv
+    command: >
+      bash -c "ln -sf /usr/share/zoneinfo/Europe/Kyiv /usr/share/zoneinfo/Europe/Kiev &&
+               exec docker-entrypoint.sh postgres"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+
+volumes:
+  postgres_data:
