@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,10 +7,12 @@ from src.database.db import get_db
 from src.services.users import UserService
 from src.services.auth import AuthService
 from src.security.hashing import Hash
+from src.schemas import TokenModel, TokenRefreshRequest
 
 router = APIRouter(prefix="/users", tags=["users"])
 hash_handler = Hash()
-auth_service=AuthService()
+auth_service = AuthService()
+
 
 @router.post("/signup")
 async def signup(body: UserModel, db: AsyncSession = Depends(get_db)):
@@ -20,7 +22,7 @@ async def signup(body: UserModel, db: AsyncSession = Depends(get_db)):
     if user:
         raise HTTPException(status_code=409, detail="Account already exists")
 
-    new_user = await user_service.register_user(body.username, body.password)
+    new_user = await user_service.register_user(body)
 
     return {"username": new_user.username}
 
@@ -35,12 +37,36 @@ async def login(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username")
 
-    if not hash_handler.verify_password(form.password, user.password):
+    if not hash_handler.verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid password")
 
     access_token = await auth_service.create_access_token({"sub": user.username})
+    refresh_token = await auth_service.create_refresh_token({"sub": user.username})
+    user.refresh_token=refresh_token
+    await db.commit()
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
-    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/refresh-token", response_model=TokenModel)
+async def new_token(request: TokenRefreshRequest, db: AsyncSession = Depends(get_db)):
+    user = await auth_service.verify_refresh_token(request.refresh_token, db)
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired refresh token",
+        )
+    new_access_token = await auth_service.create_access_token(
+        data={"sub": user.username}
+    )
+    return {
+        "access_token": new_access_token,
+        "refresh_token": request.refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @router.get("/secret")

@@ -21,8 +21,7 @@ class ContactModel(ContactBase):
 
         if not first_name:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Name is required."
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Name is required."
             )
 
         return values
@@ -50,6 +49,7 @@ class ContactUpdate(BaseModel):
     birthday: Optional[date] = None
     additional_data: Optional[str] = None
 
+
 # USERS
 
 
@@ -68,7 +68,7 @@ class UserModel(UserBase):
         if not username or not password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username and password are required."
+                detail="Username and password are required.",
             )
 
         return values
@@ -77,3 +77,16 @@ class UserModel(UserBase):
 class UserResponse(UserBase):
     id: int = Field(ge=1)
     model_config = ConfigDict(from_attributes=True)
+
+
+# TOKEN
+
+
+class TokenModel(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
+class TokenRefreshRequest(BaseModel):
+    refresh_token: str
