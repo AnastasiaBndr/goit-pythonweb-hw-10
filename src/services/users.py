@@ -1,18 +1,22 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.repository.users import UsersRepository
-from src.schemas import UserModel
+from src.security.hashing import Hash
+
+hash_handler = Hash()
 
 
 class UserService:
 
-    def __init__(self, db: AsyncSession) -> None:
-        self.repository = UsersRepository(db)
+    def __init__(self, db: AsyncSession):
+        self.repo = UsersRepository(db)
 
-    async def create_access_token(self, data: dict, expires_delta=None):
-        return await self.repository.create_access_token(data, expires_delta)
+    async def register_user(self, username: str, password: str):
+        exist = await self.repo.get_user_by_username(username)
+        if exist:
+            return None
 
-    async def get_current_user(
-        self, token: str, db: AsyncSession, credentials_exception
-    ):
-        return await self.repository.get_current_user(token, db, credentials_exception)
+        hashed = hash_handler.get_password_hash(password)
+        return await self.repo.create_user(username, hashed)
+
+    async def get_user_by_username(self, username: str):
+        return await self.repo.get_user_by_username(username)

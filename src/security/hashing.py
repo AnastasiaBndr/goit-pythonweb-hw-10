@@ -1,11 +1,7 @@
 from passlib.context import CryptContext
 
-SECRET_KEY = "secret_key"
-ALGORITHM = "HS256"
-
-
 class Hash:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)

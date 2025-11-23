@@ -65,7 +65,7 @@ class UserModel(UserBase):
         username = values.get("username")
         password = values.get("password")
 
-        if not username or password:
+        if not username or not password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username and password are required."

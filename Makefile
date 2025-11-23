@@ -1,5 +1,8 @@
 ENTRYPOINT = main.py
 
+venv:
+	source $(poetry env info --path)/Scripts/activate
+
 add:
 	git add .
 

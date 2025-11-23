@@ -10,7 +10,7 @@ SessionLocal = sessionmaker()
 
 class DatabaseSessionManager:
     def __init__(self, url: str) -> None:
-        self._engine: AsyncEngine | None = create_async_engine(url,connect_args={"check_same_thread":False})
+        self._engine: AsyncEngine | None = create_async_engine(url,echo=True)
         self._session_maker: async_sessionmaker = async_sessionmaker(
             autocommit=False, autoflush=False, bind=self._engine)
 

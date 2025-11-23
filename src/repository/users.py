@@ -9,7 +9,7 @@ class UsersRepository:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-
+    
     async def get_user_by_username(self, username: str):
         stmt = select(User).where(User.username == username)
         result = await self.db.execute(stmt)
