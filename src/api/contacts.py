@@ -19,8 +19,9 @@ async def get_contacts(
     second_name: Optional[str] = Query(None),
     email: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
+
     service = ContactService(db)
 
     if first_name or second_name or email:
@@ -34,8 +35,9 @@ async def get_contacts(
 @router.get("/birthdays", response_model=List[ContactResponse])
 async def get_upcoming_birthdays(
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
+
     contact_service = ContactService(db)
     contacts = await contact_service.get_upcoming_birthdays(user)
     return contacts
@@ -45,8 +47,8 @@ async def get_upcoming_birthdays(
 async def get_contact_by_id(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
     contact = await ContactService(db).get_contact(contact_id, user)
     if contact is None:
         raise HTTPException(
@@ -59,8 +61,8 @@ async def get_contact_by_id(
 async def create_contact(
     body: ContactModel,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
     contact_service = ContactService(db)
     return await contact_service.create_contact(body, user)
 
@@ -70,8 +72,8 @@ async def update_contact(
     contact_id: int,
     body: ContactUpdate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
     contact_service = ContactService(db)
     contact = await contact_service.update_contact(contact_id, body, user)
     if contact is None:
@@ -85,10 +87,10 @@ async def update_contact(
 async def remove_Contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(auth_service.get_current_user),
 ):
-    user: User = await Depends(auth_service.get_current_user())
     contact_service = ContactService(db)
-    contact = await contact_service.delete_contact(contact_id), user
+    contact = await contact_service.delete_contact(contact_id, user)
     if contact is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"

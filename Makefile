@@ -1,7 +1,7 @@
 ENTRYPOINT = main.py
 
 venv:
-	source $(poetry env info --path)/Scripts/activate
+	source C:/Users/abond/AppData/Local/pypoetry/Cache/virtualenvs/goit-pythonweb-hw-10-lEYL4sEn-py3.12/Scripts/activate
 
 add:
 	git add .
