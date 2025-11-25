@@ -4,6 +4,8 @@ from datetime import datetime
 
 from src.database.models import User
 
+from src.schemas import UserCreate
+
 
 class UsersRepository:
 
@@ -20,9 +22,17 @@ class UsersRepository:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create_user(self, username: str, password: str) -> User | None:
+    async def create_user(
+        self, body: UserCreate, password: str, avatar: str
+    ) -> User | None:
         today_date = datetime.now()
-        user = User(username=username, hashed_password=password, created_at=today_date)
+        user = User(
+            username=body.username,
+            email=body.email,
+            hashed_password=password,
+            created_at=today_date,
+            avatar=avatar,
+        )
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)

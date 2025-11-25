@@ -6,7 +6,7 @@ authors = [
     {name = "Anastasiia-Bondarchuk",email = "125996065+AnastasiaBndr@users.noreply.github.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12 <4.0"
 dependencies = [
     "fastapi[standard] (>=0.121.1,<0.122.0)",
     "alembic (>=1.17.1,<2.0.0)",
@@ -18,6 +18,9 @@ dependencies = [
     "python-jose[cryptography] (>=3.5.0,<4.0.0)",
     "passlib[argon2] (>=1.7.4,<2.0.0)",
     "python-dotenv (>=1.2.1,<2.0.0)",
+    "libgravatar (>=1.0.4,<2.0.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
+    "slowapi (>=0.1.9,<0.2.0)",
 ]
 
 

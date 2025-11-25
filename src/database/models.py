@@ -12,9 +12,11 @@ class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column(Date)
-    refresh_token: Mapped[str] = mapped_column(String(255),nullable=True)
+    refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
+    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
 
     def __str__(self) -> str:
         return f"User: {self.username}"
@@ -33,7 +35,7 @@ class Contact(Base):
     additional_data: Mapped[str] = mapped_column(String(200), nullable=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    user = relationship("User",backref="contacts")
+    user = relationship("User", backref="contacts")
 
     def __str__(self):
         return (

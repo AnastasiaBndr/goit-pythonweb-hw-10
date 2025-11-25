@@ -1,8 +1,16 @@
-class Config:
-    DB_URL = "postgresql+asyncpg://admin:admincontacts@localhost:5432/contacts_db"
-    JWT_SECRET="Keyyyya"
-    JWT_ALGORITHM="HS256"
-    REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
-    ACCESS_TOKEN_EXPIRE_MINUTES = 15
+from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
-config = Config
+
+class Settings(BaseSettings):
+    DB_URL: str
+    JWT_SECRET: str
+    JWT_ALGORITHM: str = "HS256"
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    model_config = ConfigDict(
+        extra="ignore", env_file=".env", env_file_encoding="utf-8", case_sensitive=True
+    )
+
+
+settings = Settings()

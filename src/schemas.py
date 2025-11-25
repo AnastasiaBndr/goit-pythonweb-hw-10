@@ -55,6 +55,10 @@ class ContactUpdate(BaseModel):
 
 class UserBase(BaseModel):
     username: str = Field(max_length=50)
+    email: str = Field(max_length=50)
+    
+
+class UserCreate(UserBase):
     password: str = Field(max_length=8)
 
 
@@ -63,12 +67,13 @@ class UserModel(UserBase):
     @model_validator(mode="before")
     def validate_items(cls, values):
         username = values.get("username")
+        email = values.get("email")
         password = values.get("password")
 
-        if not username or not password:
+        if not username or not password or not email:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username and password are required.",
+                detail="Username, email and password are required.",
             )
 
         return values
