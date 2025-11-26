@@ -17,7 +17,7 @@ from src.services.users import UserService
 from src.services.auth import AuthService
 from src.services.email import send_email
 from src.security.hashing import Hash
-from src.schemas import TokenModel, TokenRefreshRequest, RequestEmail
+from src.schemas import TokenModel, TokenRefreshRequest, RequestEmail, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 hash_handler = Hash()
@@ -45,7 +45,11 @@ async def register(
     background_tasks.add_task(
         send_email, new_user.email, new_user.username, request.base_url
     )
-    return new_user
+    return {
+        "email": new_user.email,
+        "username": new_user.username,
+        "created_at": new_user.created_at,
+    }
 
 
 @router.post("/login")
@@ -62,10 +66,10 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid password")
 
     if not user.confirmed:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="email wasn`t confirmed",
-            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="email wasn`t confirmed",
+        )
     access_token = await auth_service.create_access_token({"sub": user.username})
     refresh_token = await auth_service.create_refresh_token({"sub": user.username})
     user.refresh_token = refresh_token
