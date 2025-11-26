@@ -2,7 +2,12 @@ from fastapi import FastAPI, Request, status
 from starlette.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
+
+import uvicorn
+from fastapi import FastAPI
 from src.api import utils, contacts, users, auth
+from src.conf.config import settings
 
 app = FastAPI()
 
@@ -15,6 +20,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 @app.exception_handler(RateLimitExceeded)

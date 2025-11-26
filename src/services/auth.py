@@ -1,3 +1,4 @@
+from pathlib import Path
 from datetime import datetime, timedelta, UTC
 from fastapi import HTTPException, Depends
 from typing import Optional, Literal
@@ -5,11 +6,14 @@ from sqlalchemy import select, and_
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import BackgroundTasks
+from fastapi_mail import FastMail, MessageSchema, MessageType
 
 from src.repository.users import UsersRepository
 from src.database.db import get_db
 from src.database.models import User
 from src.conf.config import settings
+from src.schemas import EmailSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 secret_key = settings.JWT_SECRET
@@ -35,6 +39,14 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
 
     return user
+
+
+def create_email_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(UTC) + timedelta(days=7)
+    to_encode.update({"iat": datetime.now(UTC), "exp": expire})
+    token = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return token
 
 
 class AuthService:
@@ -88,5 +100,15 @@ class AuthService:
             user = result.scalar_one_or_none()
 
             return user
+        except JWTError:
+            return None
+
+    async def get_email_from_token(self,token: str):
+        try:
+            payload = jwt.decode(
+                token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+            )
+            email = payload["sub"]
+            return email
         except JWTError:
             return None
